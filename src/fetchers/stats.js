@@ -171,16 +171,19 @@ const statsFetcher = async ({
  * @see https://developer.github.com/v3/search/#search-commits
  */
 const fetchTotalCommits = (variables, token) => {
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/vnd.github.cloak-preview",
+    ...(token ? { Authorization: `token ${token}` } : {}),
+  };
+
   return axios({
     method: "get",
     url: `https://api.github.com/search/commits?q=author:${variables.login}`,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/vnd.github.cloak-preview",
-      Authorization: `token ${token}`,
-    },
+    headers,
   });
 };
+
 
 /**
  * Fetch all the commits for all the repositories of a given username.
