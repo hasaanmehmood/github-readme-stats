@@ -134,7 +134,11 @@ const statsFetcher = async ({
       includeDiscussionsAnswers,
       startTime,
     };
-    let res = await retryer(fetcher, variables);
+   const token = process.env.PAT_1; // fallback token
+  res = await retryer((vars) => fetchTotalCommits(vars, token), { login: username });
+
+    let res = await retryer((vars) => fetcher(vars, token), variables);
+
     if (res.data.errors) {
       return res;
     }
