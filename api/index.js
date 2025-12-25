@@ -49,8 +49,15 @@ export default async (req, res) => {
     rank_icon,
     show,
   } = req.query;
+
   res.setHeader("Content-Type", "image/svg+xml");
 
+  // Detect if request comes from GitHub Camo / README proxy
+  const userAgent = req.headers["user-agent"] || "";
+  const isGitHubCamo =
+    userAgent.includes("GitHub-Hookshot") || userAgent.includes("GitHub.com");
+
+  // Guard access
   const access = guardAccess({
     res,
     id: username,
@@ -85,6 +92,10 @@ export default async (req, res) => {
 
   try {
     const showStats = parseArray(show);
+
+    // Use unauthenticated fallback if request is from GitHub Camo
+    const token = isGitHubCamo ? undefined : process.env.PAT_1;
+
     const stats = await fetchStats(
       username,
       parseBoolean(include_all_commits),
@@ -94,7 +105,9 @@ export default async (req, res) => {
       showStats.includes("discussions_started"),
       showStats.includes("discussions_answered"),
       parseInt(commits_year, 10),
+      token // Pass token to fetchStats
     );
+
     const cacheSeconds = resolveCacheSeconds({
       requested: parseInt(cache_seconds, 10),
       def: CACHE_TTL.STATS_CARD.DEFAULT,
