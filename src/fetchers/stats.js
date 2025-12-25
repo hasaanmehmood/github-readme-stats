@@ -89,7 +89,8 @@ const fetcher = (variables, token) => {
   const query = variables.after ? GRAPHQL_REPOS_QUERY : GRAPHQL_STATS_QUERY;
   
   // Use token if available, otherwise fallback to unauthenticated request
-  const headers = token ? { Authorization: `bearer ${token}` } : {};
+  const authToken = token || process.env.PAT_1;
+  const headers = authToken ? { Authorization: `bearer ${authToken}` } : {};
 
   return request(
     {
@@ -175,18 +176,16 @@ const statsFetcher = async ({
  * @see https://developer.github.com/v3/search/#search-commits
  */
 const fetchTotalCommits = (variables, token) => {
+  const authToken = token || process.env.PAT_1;
   const headers = {
     "Content-Type": "application/json",
     Accept: "application/vnd.github.cloak-preview",
-    ...(token ? { Authorization: `token ${token}` } : {}),
+    ...(authToken ? { Authorization: `token ${authToken}` } : {}),
   };
 
-  return axios({
-    method: "get",
-    url: `https://api.github.com/search/commits?q=author:${variables.login}`,
-    headers,
-  });
+  return axios({ method: "get", url: `https://api.github.com/search/commits?q=author:${variables.login}`, headers });
 };
+
 
 
 /**
