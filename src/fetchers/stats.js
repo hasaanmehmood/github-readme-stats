@@ -83,13 +83,15 @@ const GRAPHQL_STATS_QUERY = `
  */
 const fetcher = (variables, token) => {
   const query = variables.after ? GRAPHQL_REPOS_QUERY : GRAPHQL_STATS_QUERY;
-
-  // Use token if available, otherwise allow unauthenticated fallback
-  const authToken = token || process.env.PAT_1;
-  const headers = authToken ? { Authorization: `bearer ${authToken}` } : {};
-
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `bearer ${token}`;
+  }
   return request({ query, variables }, headers);
 };
+
 
 /**
  * Fetch total commits using REST API
